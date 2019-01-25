@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class GameBoard
+class PathBoard
 {
 
 private:
@@ -17,7 +17,7 @@ private:
 
 public:
 
-  GameBoard(int Blength) : Map(Blength*Blength, false)
+  PathBoard(int Blength) : Map(Blength*Blength, false)
   {
     BoardLength = Blength;
     // dir[0] = Blength; // right
@@ -27,7 +27,7 @@ public:
   }
 
 
-  ~GameBoard()
+  ~PathBoard()
   {}
 
 
@@ -36,52 +36,52 @@ public:
     bool result[1];
     *result = false;
 
-    vector<bool> visitedH(BoardLength*BoardLength, false);
-    vector<bool> visitedV(BoardLength*BoardLength, false);
+    vector<bool> NoVisitedH(BoardLength*BoardLength, true);
+    vector<bool> NoVisitedV(BoardLength*BoardLength, true);
 
     for(int i=0; i<BoardLength; i++)
     {
-      SeeNodeH(i, visitedH, result);
-      SeeNodeV(i*BoardLength, visitedV, result);
+      SeeNodeH(i, NoVisitedH, result);
+      SeeNodeV(i*BoardLength, NoVisitedV, result);
     }
 
     return *result;
   }
 
 
-  void SeeNodeH(int Node, vector<bool> visit,  bool *res)
+  void SeeNodeH(int Node, vector<bool> NoVisit,  bool *res)
   {
     if(!(*res) && Node>0 && Node<BoardLength*BoardLength)
-      if(this->Map[Node] && !(visit[Node]))
+      if(this->Map[Node] && NoVisit[Node])
       {
-        visit[Node] = true;
+        NoVisit[Node] = false;
         if(Node/BoardLength + 1 == BoardLength || *res)
           *res = true;
         else
         {
-          SeeNodeH(Node+BoardLength, visit, res);
-          SeeNodeH(Node+1, visit, res);
-          SeeNodeH(Node-1, visit, res);
-          SeeNodeH(Node-BoardLength, visit, res);
+          SeeNodeH(Node+BoardLength, NoVisit, res);
+          SeeNodeH(Node+1, NoVisit, res);
+          SeeNodeH(Node-1, NoVisit, res);
+          SeeNodeH(Node-BoardLength, NoVisit, res);
         }
       }
   }
 
 
-  void SeeNodeV(int Node, vector<bool> visit,  bool *res)
+  void SeeNodeV(int Node, vector<bool> NoVisit,  bool *res)
   {
     if(!(*res) && Node>0 && Node<BoardLength*BoardLength)
-      if(this->Map[Node] && !(visit[Node]))
+      if(this->Map[Node] && NoVisit[Node])
       {
-        visit[Node] = true;
+        NoVisit[Node] = false;
         if(Node - Node/BoardLength + 1 == BoardLength)
           *res = true;
         else
         {
-          SeeNodeV(Node+1, visit, res);
-          SeeNodeV(Node+BoardLength, visit, res);
-          SeeNodeV(Node-BoardLength, visit, res);
-          SeeNodeV(Node-1, visit, res);
+          SeeNodeV(Node+1, NoVisit, res);
+          SeeNodeV(Node+BoardLength, NoVisit, res);
+          SeeNodeV(Node-BoardLength, NoVisit, res);
+          SeeNodeV(Node-1, NoVisit, res);
         }
       }
   }
