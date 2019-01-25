@@ -3,32 +3,39 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
-
 class PathBoard
 {
 
 private:
 
-  vector<bool> Map;
+  std::vector<bool> Map;
+  std::vector<short int> *Neighbours;
 
-  int BoardLength;
-  // int dir[4];
+  short int BoardLength;
 
 public:
 
   PathBoard(int Blength) : Map(Blength*Blength, false)
   {
-    BoardLength = Blength;
-    // dir[0] = Blength; // right
-    // dir[1] = 1; // down
-    // dir[2] = -Blength; // left
-    // dir[3] = -1; // up
+    this->BoardLength = Blength; 
+    this->Neighbours = new std::vector<short int> [Blength*Blength];
+
+    int tempnode;
+    for(int i=0; i<Blength; i++)
+      for(int j=0; j<Blength; j++)
+      {
+        tempnode = i*Blength + j;
+        if( i+1 != Blength) this->Neighbours[tempnode].push_back(tempnode + Blength); // Right
+        if( j+1 != Blength) this->Neighbours[tempnode].push_back(tempnode + 1); // Down
+        if( i != 0) this->Neighbours[tempnode].push_back(tempnode - Blength); // Left
+        if( j != 0) this->Neighbours[tempnode].push_back(tempnode - 1); // Up
+      }
   }
 
 
   ~PathBoard()
-  {}
+  {
+  }
 
 
   bool HasWon()
@@ -36,54 +43,50 @@ public:
     bool result[1];
     *result = false;
 
-    vector<bool> NoVisitedH(BoardLength*BoardLength, true);
-    vector<bool> NoVisitedV(BoardLength*BoardLength, true);
+    std::vector<bool> NoVisitedH(BoardLength*BoardLength, true);
+    std::vector<bool> NoVisitedV(BoardLength*BoardLength, true);
 
-    for(int i=0; i<BoardLength; i++)
+    for(short int i=0; i<BoardLength; i++)
     {
-      SeeNodeH(i, NoVisitedH, result);
-      SeeNodeV(i*BoardLength, NoVisitedV, result);
+      SeeNodeH(i, &NoVisitedH, result);
+      SeeNodeV(i*BoardLength, &NoVisitedV, result);
     }
 
     return *result;
   }
 
 
-  void SeeNodeH(int Node, vector<bool> NoVisit,  bool *res)
+  void SeeNodeH(int Node, std::vector<bool> *NoVisit,  bool *res)
   {
-    if(!(*res) && Node>0 && Node<BoardLength*BoardLength)
-      if(this->Map[Node] && NoVisit[Node])
+    if(!(*res))
+      if(this->Map[Node] && (*NoVisit)[Node])
       {
-        NoVisit[Node] = false;
-        if(Node/BoardLength + 1 == BoardLength || *res)
+        (*NoVisit)[Node] = false;
+        if(Node/BoardLength + 1 == BoardLength)
           *res = true;
         else
         {
-          SeeNodeH(Node+BoardLength, NoVisit, res);
-          SeeNodeH(Node+1, NoVisit, res);
-          SeeNodeH(Node-1, NoVisit, res);
-          SeeNodeH(Node-BoardLength, NoVisit, res);
+          for(short int i=0; i<this->Neighbours[Node].size(); i++)
+            SeeNodeH(Neighbours[Node][i], NoVisit, res);
         }
       }
   }
 
 
-  void SeeNodeV(int Node, vector<bool> NoVisit,  bool *res)
+  void SeeNodeV(int Node, std::vector<bool> *NoVisit,  bool *res)
   {
-    if(!(*res) && Node>0 && Node<BoardLength*BoardLength)
-      if(this->Map[Node] && NoVisit[Node])
+    if(!(*res))
+      if(this->Map[Node] && (*NoVisit)[Node])
       {
-        NoVisit[Node] = false;
+        (*NoVisit)[Node] = false;
         if(Node - Node/BoardLength + 1 == BoardLength)
           *res = true;
         else
         {
-          SeeNodeV(Node+1, NoVisit, res);
-          SeeNodeV(Node+BoardLength, NoVisit, res);
-          SeeNodeV(Node-BoardLength, NoVisit, res);
-          SeeNodeV(Node-1, NoVisit, res);
+          for(short int i=0; i<this->Neighbours[Node].size(); i++)
+            SeeNodeV(Neighbours[Node][i], NoVisit, res);
         }
-      }
+      } 
   }
 
 
@@ -93,7 +96,7 @@ public:
   }
 
 
-  void print(ofstream out)
+  void print(std::ofstream& out)
   {
     for(int i=0; i<BoardLength; i++)
     {
@@ -104,7 +107,7 @@ public:
   }
 
 
-  void print(ostream& out)
+  void print(std::ostream& out)
   {
     for(int i=0; i<BoardLength; i++)
     {
