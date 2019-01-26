@@ -31,11 +31,24 @@ public:
   }
 
 
+  bool color()
+  {
+    return this->Stack.back();
+  }
+
+
   void add(bool value)
   {
     Stack.push_back(value);
   }
 
+  short int WhatTop()
+  {
+    short int type = 0;
+    if(this->Pathable) type++;
+    if(!(this->Steppable)) type+=2;
+    return type;
+  }
 
   bool ChangeTop(short int type)
   {
