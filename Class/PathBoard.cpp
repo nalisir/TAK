@@ -79,7 +79,7 @@ public:
       if(this->Map[Node] && (*NoVisit)[Node])
       {
         (*NoVisit)[Node] = false;
-        if(Node - Node/BoardLength + 1 == BoardLength)
+        if(Node - (Node/BoardLength)*BoardLength + 1 == BoardLength)
           *res = true;
         else
         {
