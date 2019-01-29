@@ -9,8 +9,7 @@ class PathBoard
 private:
 
   std::vector<bool> Map;
-  std::vector<short int> *Neighbours;
-
+  
   short int BoardLength;
 
 public:
@@ -18,18 +17,7 @@ public:
   PathBoard(int Blength) : Map(Blength*Blength, false)
   {
     this->BoardLength = Blength; 
-    this->Neighbours = new std::vector<short int> [Blength*Blength];
-
     int tempnode;
-    for(int i=0; i<Blength; i++)
-      for(int j=0; j<Blength; j++)
-      {
-        tempnode = i*Blength + j;
-        if( i+1 != Blength) this->Neighbours[tempnode].push_back(tempnode + Blength); // Right
-        if( j+1 != Blength) this->Neighbours[tempnode].push_back(tempnode + 1); // Down
-        if( i != 0) this->Neighbours[tempnode].push_back(tempnode - Blength); // Left
-        if( j != 0) this->Neighbours[tempnode].push_back(tempnode - 1); // Up
-      }
   }
 
 
@@ -38,25 +26,24 @@ public:
   }
 
 
-  bool HasWon()
+  bool HasWon(std::vector<int> *neighbours)
   {
-    bool result[1];
-    *result = false;
+    bool result = false;
 
     std::vector<bool> NoVisitedH(BoardLength*BoardLength, true);
     std::vector<bool> NoVisitedV(BoardLength*BoardLength, true);
 
     for(short int i=0; i<BoardLength; i++)
     {
-      SeeNodeH(i, &NoVisitedH, result);
-      SeeNodeV(i*BoardLength, &NoVisitedV, result);
+      SeeNodeH(i, &NoVisitedH, neighbours, &result);
+      SeeNodeV(i*BoardLength, &NoVisitedV, neighbours, &result);
     }
 
     return *result;
   }
 
 
-  void SeeNodeH(int Node, std::vector<bool> *NoVisit,  bool *res)
+  void SeeNodeH(int Node, std::vector<bool> *NoVisit, std::vector<int> *neighb, bool *res)
   {
     if(!(*res))
       if(this->Map[Node] && (*NoVisit)[Node])
@@ -66,14 +53,15 @@ public:
           *res = true;
         else
         {
-          for(short int i=0; i<this->Neighbours[Node].size(); i++)
-            SeeNodeH(Neighbours[Node][i], NoVisit, res);
+          for(short int i=0; i<this->(*neighb)[Node].size(); i++)
+            if((*neighb)[Node][i] >= 0)
+              SeeNodeH((*neighb)[Node][i], NoVisit, res);
         }
       }
   }
 
 
-  void SeeNodeV(int Node, std::vector<bool> *NoVisit,  bool *res)
+  void SeeNodeV(int Node, std::vector<bool> *NoVisit, std::vector<int> *neighb,  bool *res)
   {
     if(!(*res))
       if(this->Map[Node] && (*NoVisit)[Node])
@@ -83,8 +71,9 @@ public:
           *res = true;
         else
         {
-          for(short int i=0; i<this->Neighbours[Node].size(); i++)
-            SeeNodeV(Neighbours[Node][i], NoVisit, res);
+          for(short int i=0; i<this->(*neighb)[Node].size(); i++)
+            if((*neighb)[Node][i] >= 0)
+              SeeNodeV((*neighb)[Node][i], NoVisit, res);
         }
       } 
   }
